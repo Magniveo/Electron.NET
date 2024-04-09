@@ -1,15 +1,18 @@
-import { Socket } from 'net';
-import { BrowserView } from 'electron';
+import {Socket} from 'net';
+import {BrowserView} from 'electron';
+
 const browserViews: BrowserView[] = (global['browserViews'] = global['browserViews'] || []) as BrowserView[];
 let browserView: BrowserView, electronSocket;
-const proxyToCredentialsMap: { [proxy: string]: string } = (global['proxyToCredentialsMap'] = global['proxyToCredentialsMap'] || []) as { [proxy: string]: string };
+const proxyToCredentialsMap: { [proxy: string]: string } = (global['proxyToCredentialsMap'] = global['proxyToCredentialsMap'] || []) as {
+    [proxy: string]: string
+};
 
 const browserViewApi = (socket: Socket) => {
     electronSocket = socket;
 
     socket.on('createBrowserView', (options) => {
         if (!hasOwnChildreen(options, 'webPreferences', 'nodeIntegration')) {
-            options = { ...options, webPreferences: { nodeIntegration: true, contextIsolation: false } };
+            options = {...options, webPreferences: {nodeIntegration: true, contextIsolation: false}};
         }
 
         browserView = new BrowserView(options);
@@ -71,4 +74,4 @@ function getBrowserViewById(id: number) {
     }
 }
 
-export { browserViewApi, browserViewMediateService };
+export {browserViewApi, browserViewMediateService};

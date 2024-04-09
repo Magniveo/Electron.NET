@@ -9,8 +9,7 @@ module.exports = (socket, app) => {
         // to stay active until the user quits explicitly with Cmd + Q
         if (process.platform !== 'darwin' && isQuitWindowAllClosed) {
             app.quit();
-        }
-        else if (appWindowAllClosedEventId) {
+        } else if (appWindowAllClosedEventId) {
             // If the user is on macOS
             // - OR -
             // If the user has indicated NOT to quit when all windows are closed,
@@ -95,8 +94,7 @@ module.exports = (socket, app) => {
         if (options) {
             const nativeImage = await app.getFileIcon(path, options).catch((errorFileIcon) => error = errorFileIcon);
             electronSocket.emit('appGetFileIconCompleted', [error, nativeImage]);
-        }
-        else {
+        } else {
             const nativeImage = await app.getFileIcon(path).catch((errorFileIcon) => error = errorFileIcon);
             electronSocket.emit('appGetFileIconCompleted', [error, nativeImage]);
         }
@@ -232,8 +230,7 @@ module.exports = (socket, app) => {
         app.on(eventName, (...args) => {
             if (args.length > 1) {
                 electronSocket.emit(listenerName, args[1]);
-            }
-            else {
+            } else {
                 electronSocket.emit(listenerName);
             }
         });
@@ -242,8 +239,7 @@ module.exports = (socket, app) => {
         app.once(eventName, (...args) => {
             if (args.length > 1) {
                 electronSocket.emit(listenerName, args[1]);
-            }
-            else {
+            } else {
                 electronSocket.emit(listenerName);
             }
         });

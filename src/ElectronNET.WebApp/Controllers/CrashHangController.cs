@@ -1,79 +1,70 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ElectronNET.API;
+﻿using ElectronNET.API;
 using ElectronNET.API.Entities;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ElectronNET.WebApp.Controllers
+namespace ElectronNET.WebApp.Controllers;
+
+public class CrashHangController : Controller
 {
-    public class CrashHangController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
+        if (HybridSupport.IsElectronActive)
         {
-            if (HybridSupport.IsElectronActive)
+            Electron.IpcMain.On("process-crash", async args =>
             {
-                Electron.IpcMain.On("process-crash", async (args) =>
+                var viewPath = $"http://localhost:{BridgeSettings.WebPort}/crashhang/processcrash";
+
+                var browserWindow = await Electron.WindowManager.CreateWindowAsync(viewPath);
+                browserWindow.WebContents.OnCrashed += async killed =>
                 {
-                    string viewPath = $"http://localhost:{BridgeSettings.WebPort}/crashhang/processcrash";
-
-                    var browserWindow = await Electron.WindowManager.CreateWindowAsync(viewPath);
-                    browserWindow.WebContents.OnCrashed += async (killed) =>
+                    var options = new MessageBoxOptions("This process has crashed.")
                     {
-                        var options = new MessageBoxOptions("This process has crashed.")
-                        {
-                            Type = MessageBoxType.info,
-                            Title = "Renderer Process Crashed",
-                            Buttons = new string[] { "Reload", "Close" }
-                        };
-                        var result = await Electron.Dialog.ShowMessageBoxAsync(options);
-
-                        if (result.Response == 0)
-                        {
-                            browserWindow.Reload();
-                        }
-                        else
-                        {
-                            browserWindow.Close();
-                        }
+                        Type = MessageBoxType.info,
+                        Title = "Renderer Process Crashed",
+                        Buttons = new[] { "Reload", "Close" }
                     };
-                });
+                    var result = await Electron.Dialog.ShowMessageBoxAsync(options);
 
-                Electron.IpcMain.On("process-hang", async (args) =>
+                    if (result.Response == 0)
+                        browserWindow.Reload();
+                    else
+                        browserWindow.Close();
+                };
+            });
+
+            Electron.IpcMain.On("process-hang", async args =>
+            {
+                var viewPath = $"http://localhost:{BridgeSettings.WebPort}/crashhang/processhang";
+
+                var browserWindow = await Electron.WindowManager.CreateWindowAsync(viewPath);
+                browserWindow.OnUnresponsive += async () =>
                 {
-                    string viewPath = $"http://localhost:{BridgeSettings.WebPort}/crashhang/processhang";
-
-                    var browserWindow = await Electron.WindowManager.CreateWindowAsync(viewPath);
-                    browserWindow.OnUnresponsive += async () =>
+                    var options = new MessageBoxOptions("This process is hanging.")
                     {
-                        var options = new MessageBoxOptions("This process is hanging.")
-                        {
-                            Type = MessageBoxType.info,
-                            Title = "Renderer Process Hanging",
-                            Buttons = new string[] { "Reload", "Close" }
-                        };
-                        var result = await Electron.Dialog.ShowMessageBoxAsync(options);
-
-                        if (result.Response == 0)
-                        {
-                            browserWindow.Reload();
-                        }
-                        else
-                        {
-                            browserWindow.Close();
-                        }
+                        Type = MessageBoxType.info,
+                        Title = "Renderer Process Hanging",
+                        Buttons = new[] { "Reload", "Close" }
                     };
-                });
-            }
+                    var result = await Electron.Dialog.ShowMessageBoxAsync(options);
 
-            return View();
+                    if (result.Response == 0)
+                        browserWindow.Reload();
+                    else
+                        browserWindow.Close();
+                };
+            });
         }
 
-        public IActionResult ProcessCrash()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        public IActionResult ProcessHang()
-        {
-            return View();
-        }
+    public IActionResult ProcessCrash()
+    {
+        return View();
+    }
+
+    public IActionResult ProcessHang()
+    {
+        return View();
     }
 }

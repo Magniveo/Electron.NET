@@ -1,71 +1,56 @@
-﻿using ElectronNET.API.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ElectronNET.API.Entities;
 
-namespace ElectronNET.API.Extensions
+namespace ElectronNET.API.Extensions;
+
+internal static class MenuItemExtensions
 {
-    internal static class MenuItemExtensions
+    public static MenuItem[] AddMenuItemsId(this MenuItem[] menuItems)
     {
-        public static MenuItem[] AddMenuItemsId(this MenuItem[] menuItems)
+        for (var index = 0; index < menuItems.Length; index++)
         {
-            for (int index = 0; index < menuItems.Length; index++)
-            {
-                var menuItem = menuItems[index];
-                if (menuItem?.Submenu?.Length > 0)
-                {
-                    AddMenuItemsId(menuItem.Submenu);
-                }
+            var menuItem = menuItems[index];
+            if (menuItem?.Submenu?.Length > 0) AddMenuItemsId(menuItem.Submenu);
 
-                if (string.IsNullOrEmpty(menuItem.Id) && menuItem.Click != null)
-                {
-                    menuItem.Id = Guid.NewGuid().ToString();
-                }
-            }
-
-            return menuItems;
+            if (string.IsNullOrEmpty(menuItem.Id) && menuItem.Click != null) menuItem.Id = Guid.NewGuid().ToString();
         }
 
-        public static MenuItem GetMenuItem(this List<MenuItem> menuItems, string id)
-        {
-            MenuItem result = new MenuItem();
+        return menuItems;
+    }
 
-            foreach (var item in menuItems)
+    public static MenuItem GetMenuItem(this List<MenuItem> menuItems, string id)
+    {
+        var result = new MenuItem();
+
+        foreach (var item in menuItems)
+            if (item.Id == id)
             {
-                if (item.Id == id)
-                {
-                    result = item;
-                }
-                else if (item?.Submenu?.Length > 0)
-                {
-                    var menuItem = GetMenuItem(item.Submenu.ToList(), id);
-                    if (menuItem.Id == id)
-                    {
-                        result = menuItem;
-                    }
-                }
+                result = item;
+            }
+            else if (item?.Submenu?.Length > 0)
+            {
+                var menuItem = GetMenuItem(item.Submenu.ToList(), id);
+                if (menuItem.Id == id) result = menuItem;
             }
 
-            return result;
-        }
+        return result;
+    }
 
-        public static MenuItem[] AddSubmenuTypes(this MenuItem[] menuItems)
+    public static MenuItem[] AddSubmenuTypes(this MenuItem[] menuItems)
+    {
+        for (var index = 0; index < menuItems.Length; index++)
         {
-            for (int index = 0; index < menuItems.Length; index++)
+            var menuItem = menuItems[index];
+            if (menuItem?.Submenu?.Length > 0)
             {
-                var menuItem = menuItems[index];
-                if (menuItem?.Submenu?.Length > 0)
-                {
-                    if(menuItem.Type == MenuType.normal)
-                    {
-                        menuItem.Type = MenuType.submenu;
-                    }
+                if (menuItem.Type == MenuType.normal) menuItem.Type = MenuType.submenu;
 
-                    AddSubmenuTypes(menuItem.Submenu);
-                }
+                AddSubmenuTypes(menuItem.Submenu);
             }
-
-            return menuItems;
         }
+
+        return menuItems;
     }
 }

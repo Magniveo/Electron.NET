@@ -2,46 +2,41 @@
 using System.IO;
 using System.Reflection;
 
-namespace ElectronNET.CLI
+namespace ElectronNET.CLI;
+
+public static class EmbeddedFileHelper
 {
-    public static class EmbeddedFileHelper
+    private const string ResourcePath = "ElectronNET.CLI.{0}";
+
+    private static Stream GetTestResourceFileStream(string folderAndFileInProjectPath)
     {
-        private const string ResourcePath = "ElectronNET.CLI.{0}";
+        var asm = Assembly.GetExecutingAssembly();
+        var resource = string.Format(ResourcePath, folderAndFileInProjectPath);
 
-        private static Stream GetTestResourceFileStream(string folderAndFileInProjectPath)
+        return asm.GetManifestResourceStream(resource);
+    }
+
+    public static void DeployEmbeddedFile(string targetPath, string file, string namespacePath = "")
+    {
+        using (var fileStream = File.Create(Path.Combine(targetPath, file)))
         {
-            var asm = Assembly.GetExecutingAssembly();
-            var resource = string.Format(ResourcePath, folderAndFileInProjectPath);
+            var streamFromEmbeddedFile = GetTestResourceFileStream("ElectronHost." + namespacePath + file);
+            if (streamFromEmbeddedFile == null) Console.WriteLine("Error: Couldn't find embedded file: " + file);
 
-            return asm.GetManifestResourceStream(resource);
+            streamFromEmbeddedFile.CopyTo(fileStream);
         }
+    }
 
-        public static void DeployEmbeddedFile(string targetPath, string file, string namespacePath = "")
+    public static void DeployEmbeddedFileToTargetFile(string targetPath, string embeddedFile, string targetFile,
+        string namespacePath = "")
+    {
+        using (var fileStream = File.Create(Path.Combine(targetPath, targetFile)))
         {
-            using (var fileStream = File.Create(Path.Combine(targetPath, file)))
-            {
-                var streamFromEmbeddedFile = GetTestResourceFileStream("ElectronHost." + namespacePath + file);
-                if (streamFromEmbeddedFile == null)
-                {
-                    Console.WriteLine("Error: Couldn't find embedded file: " + file);
-                }
+            var streamFromEmbeddedFile = GetTestResourceFileStream("ElectronHost." + namespacePath + embeddedFile);
+            if (streamFromEmbeddedFile == null)
+                Console.WriteLine("Error: Couldn't find embedded file: " + embeddedFile);
 
-                streamFromEmbeddedFile.CopyTo(fileStream);
-            }
-        }
-
-        public static void DeployEmbeddedFileToTargetFile(string targetPath, string embeddedFile, string targetFile, string namespacePath = "")
-        {
-            using (var fileStream = File.Create(Path.Combine(targetPath, targetFile)))
-            {
-                var streamFromEmbeddedFile = GetTestResourceFileStream("ElectronHost." + namespacePath + embeddedFile);
-                if (streamFromEmbeddedFile == null)
-                {
-                    Console.WriteLine("Error: Couldn't find embedded file: " + embeddedFile);
-                }
-
-                streamFromEmbeddedFile.CopyTo(fileStream);
-            }
+            streamFromEmbeddedFile.CopyTo(fileStream);
         }
     }
 }

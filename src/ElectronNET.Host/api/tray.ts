@@ -1,6 +1,7 @@
-import { Socket } from 'net';
-import { Menu, Tray, nativeImage } from 'electron';
-let tray: { value: Electron.Tray } = (global['$tray'] = global['tray'] || { value: null });
+import {Socket} from 'net';
+import {Menu, nativeImage, Tray} from 'electron';
+
+let tray: { value: Electron.Tray } = (global['$tray'] = global['tray'] || {value: null});
 let electronSocket;
 
 export = (socket: Socket) => {
@@ -113,7 +114,7 @@ export = (socket: Socket) => {
     });
 
     socket.on('register-tray-on-event', (eventName, listenerName) => {
-        if (tray.value){
+        if (tray.value) {
             tray.value.on(eventName, (...args) => {
                 if (args.length > 1) {
                     electronSocket.emit(listenerName, args[1]);
@@ -125,7 +126,7 @@ export = (socket: Socket) => {
     });
 
     socket.on('register-tray-once-event', (eventName, listenerName) => {
-        if (tray.value){
+        if (tray.value) {
             tray.value.once(eventName, (...args) => {
                 if (args.length > 1) {
                     electronSocket.emit(listenerName, args[1]);
@@ -143,7 +144,9 @@ export = (socket: Socket) => {
             }
 
             if ('id' in item && item.id) {
-                item.click = () => { callback(item.id); };
+                item.click = () => {
+                    callback(item.id);
+                };
             }
         });
     }

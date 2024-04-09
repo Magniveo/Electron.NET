@@ -1,6 +1,6 @@
 "use strict";
 const electron_1 = require("electron");
-let tray = (global['$tray'] = global['tray'] || { value: null });
+let tray = (global['$tray'] = global['tray'] || {value: null});
 let electronSocket;
 module.exports = (socket) => {
     electronSocket = socket;
@@ -99,8 +99,7 @@ module.exports = (socket) => {
             tray.value.on(eventName, (...args) => {
                 if (args.length > 1) {
                     electronSocket.emit(listenerName, args[1]);
-                }
-                else {
+                } else {
                     electronSocket.emit(listenerName);
                 }
             });
@@ -111,20 +110,22 @@ module.exports = (socket) => {
             tray.value.once(eventName, (...args) => {
                 if (args.length > 1) {
                     electronSocket.emit(listenerName, args[1]);
-                }
-                else {
+                } else {
                     electronSocket.emit(listenerName);
                 }
             });
         }
     });
+
     function addMenuItemClickConnector(menuItems, callback) {
         menuItems.forEach((item) => {
             if (item.submenu && item.submenu.items.length > 0) {
                 addMenuItemClickConnector(item.submenu.items, callback);
             }
             if ('id' in item && item.id) {
-                item.click = () => { callback(item.id); };
+                item.click = () => {
+                    callback(item.id);
+                };
             }
         });
     }

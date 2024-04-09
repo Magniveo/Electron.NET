@@ -1,9 +1,10 @@
-import { Socket } from 'socket.io';
+import {Socket} from 'socket.io';
 
 export class Connector {
     constructor(private socket: Socket,
-        // @ts-ignore
-        public app: Electron.App) { }
+                // @ts-ignore
+                public app: Electron.App) {
+    }
 
     on(key: string, javaScriptCode: Function): void {
         this.socket.on(key, (...args: any[]) => {

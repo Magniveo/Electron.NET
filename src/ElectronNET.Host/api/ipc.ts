@@ -1,5 +1,6 @@
-import { ipcMain, BrowserWindow, BrowserView } from 'electron';
-import { Socket } from 'net';
+import {BrowserView, BrowserWindow, ipcMain} from 'electron';
+import {Socket} from 'net';
+
 let electronSocket;
 
 export = (socket: Socket) => {

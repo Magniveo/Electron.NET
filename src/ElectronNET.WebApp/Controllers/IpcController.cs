@@ -1,28 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
 using ElectronNET.API;
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ElectronNET.WebApp.Controllers
+namespace ElectronNET.WebApp.Controllers;
+
+public class IpcController : Controller
 {
-    public class IpcController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
+        if (HybridSupport.IsElectronActive)
         {
-            if(HybridSupport.IsElectronActive)
+            Electron.IpcMain.On("async-msg", args =>
             {
-                Electron.IpcMain.On("async-msg", (args) =>
-                {
-                    var mainWindow = Electron.WindowManager.BrowserWindows.First();
-                    Electron.IpcMain.Send(mainWindow, "asynchronous-reply", "pong");
-                });
+                var mainWindow = Electron.WindowManager.BrowserWindows.First();
+                Electron.IpcMain.Send(mainWindow, "asynchronous-reply", "pong");
+            });
 
-                Electron.IpcMain.OnSync("sync-msg", (args) =>
-                {
-                    return "pong";
-                });
-            }
-
-            return View();
+            Electron.IpcMain.OnSync("sync-msg", args => { return "pong"; });
         }
+
+        return View();
     }
 }

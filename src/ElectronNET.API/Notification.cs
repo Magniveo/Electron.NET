@@ -1,147 +1,139 @@
-﻿using ElectronNET.API.Entities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ElectronNET.API.Entities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
-namespace ElectronNET.API
+namespace ElectronNET.API;
+
+/// <summary>
+///     Create OS desktop notifications
+/// </summary>
+public sealed class Notification
 {
-    /// <summary>
-    /// Create OS desktop notifications
-    /// </summary>
-    public sealed class Notification
+    private static Notification _notification;
+    private static readonly object _syncRoot = new();
+
+    private static readonly List<NotificationOptions> _notificationOptions = new();
+
+    private readonly JsonSerializer _jsonSerializer = new()
     {
-        private static Notification _notification;
-        private static object _syncRoot = new object();
+        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore
+    };
 
-        internal Notification() { }
+    internal Notification()
+    {
+    }
 
-        internal static Notification Instance
+    internal static Notification Instance
+    {
+        get
         {
-            get
-            {
-                if (_notification == null)
+            if (_notification == null)
+                lock (_syncRoot)
                 {
-                    lock (_syncRoot)
-                    {
-                        if (_notification == null)
-                        {
-                            _notification = new Notification();
-                        }
-                    }
+                    if (_notification == null) _notification = new Notification();
                 }
 
-                return _notification;
-            }
+            return _notification;
+        }
+    }
+
+    /// <summary>
+    ///     Create OS desktop notifications
+    /// </summary>
+    /// <param name="notificationOptions"></param>
+    public void Show(NotificationOptions notificationOptions)
+    {
+        GenerateIDsForDefinedActions(notificationOptions);
+
+        BridgeConnector.Socket.Emit("createNotification", JObject.FromObject(notificationOptions, _jsonSerializer));
+    }
+
+    private static void GenerateIDsForDefinedActions(NotificationOptions notificationOptions)
+    {
+        var isActionDefined = false;
+
+        if (notificationOptions.OnShow != null)
+        {
+            notificationOptions.ShowID = Guid.NewGuid().ToString();
+            isActionDefined = true;
+
+            BridgeConnector.Socket.Off("NotificationEventShow");
+            BridgeConnector.Socket.On("NotificationEventShow",
+                id => { _notificationOptions.Single(x => x.ShowID == id.ToString()).OnShow(); });
         }
 
-        private static List<NotificationOptions> _notificationOptions = new List<NotificationOptions>();
-
-        /// <summary>
-        /// Create OS desktop notifications
-        /// </summary>
-        /// <param name="notificationOptions"></param>
-        public void Show(NotificationOptions notificationOptions)
+        if (notificationOptions.OnClick != null)
         {
-            GenerateIDsForDefinedActions(notificationOptions);
+            notificationOptions.ClickID = Guid.NewGuid().ToString();
+            isActionDefined = true;
 
-            BridgeConnector.Socket.Emit("createNotification", JObject.FromObject(notificationOptions, _jsonSerializer));
+            BridgeConnector.Socket.Off("NotificationEventClick");
+            BridgeConnector.Socket.On("NotificationEventClick",
+                id => { _notificationOptions.Single(x => x.ClickID == id.ToString()).OnClick(); });
         }
 
-        private static void GenerateIDsForDefinedActions(NotificationOptions notificationOptions)
+        if (notificationOptions.OnClose != null)
         {
-            bool isActionDefined = false;
+            notificationOptions.CloseID = Guid.NewGuid().ToString();
+            isActionDefined = true;
 
-            if (notificationOptions.OnShow != null)
-            {
-                notificationOptions.ShowID = Guid.NewGuid().ToString();
-                isActionDefined = true;
-
-                BridgeConnector.Socket.Off("NotificationEventShow");
-                BridgeConnector.Socket.On("NotificationEventShow", (id) => {
-                    _notificationOptions.Single(x => x.ShowID == id.ToString()).OnShow();
-                });
-            }
-
-            if (notificationOptions.OnClick != null)
-            {
-                notificationOptions.ClickID = Guid.NewGuid().ToString();
-                isActionDefined = true;
-
-                BridgeConnector.Socket.Off("NotificationEventClick");
-                BridgeConnector.Socket.On("NotificationEventClick", (id) => {
-                    _notificationOptions.Single(x => x.ClickID == id.ToString()).OnClick();
-                });
-            }
-
-            if (notificationOptions.OnClose != null)
-            {
-                notificationOptions.CloseID = Guid.NewGuid().ToString();
-                isActionDefined = true;
-
-                BridgeConnector.Socket.Off("NotificationEventClose");
-                BridgeConnector.Socket.On("NotificationEventClose", (id) => {
-                    _notificationOptions.Single(x => x.CloseID == id.ToString()).OnClose();
-                });
-            }
-
-            if (notificationOptions.OnReply != null)
-            {
-                notificationOptions.ReplyID = Guid.NewGuid().ToString();
-                isActionDefined = true;
-
-                BridgeConnector.Socket.Off("NotificationEventReply");
-                BridgeConnector.Socket.On("NotificationEventReply", (args) => {
-                    var arguments = ((JArray)args).ToObject<string[]>();
-                    _notificationOptions.Single(x => x.ReplyID == arguments[0].ToString()).OnReply(arguments[1].ToString());
-                });
-            }
-
-            if (notificationOptions.OnAction != null)
-            {
-                notificationOptions.ActionID = Guid.NewGuid().ToString();
-                isActionDefined = true;
-
-                BridgeConnector.Socket.Off("NotificationEventAction");
-                BridgeConnector.Socket.On("NotificationEventAction", (args) => {
-                    var arguments = ((JArray)args).ToObject<string[]>();
-                    _notificationOptions.Single(x => x.ReplyID == arguments[0].ToString()).OnAction(arguments[1].ToString());
-                });
-            }
-
-            if (isActionDefined)
-            {
-                _notificationOptions.Add(notificationOptions);
-            }
+            BridgeConnector.Socket.Off("NotificationEventClose");
+            BridgeConnector.Socket.On("NotificationEventClose",
+                id => { _notificationOptions.Single(x => x.CloseID == id.ToString()).OnClose(); });
         }
 
-        /// <summary>
-        /// Whether or not desktop notifications are supported on the current system.
-        /// </summary>
-        /// <returns></returns>
-        public Task<bool> IsSupportedAsync()
+        if (notificationOptions.OnReply != null)
         {
-            var taskCompletionSource = new TaskCompletionSource<bool>();
+            notificationOptions.ReplyID = Guid.NewGuid().ToString();
+            isActionDefined = true;
 
-            BridgeConnector.Socket.On("notificationIsSupportedComplete", (isSupported) =>
+            BridgeConnector.Socket.Off("NotificationEventReply");
+            BridgeConnector.Socket.On("NotificationEventReply", args =>
             {
-                BridgeConnector.Socket.Off("notificationIsSupportedComplete");
-                taskCompletionSource.SetResult((bool)isSupported);
+                var arguments = ((JArray)args).ToObject<string[]>();
+                _notificationOptions.Single(x => x.ReplyID == arguments[0]).OnReply(arguments[1]);
             });
-
-            BridgeConnector.Socket.Emit("notificationIsSupported");
-
-            return taskCompletionSource.Task;
         }
 
-        private JsonSerializer _jsonSerializer = new JsonSerializer()
+        if (notificationOptions.OnAction != null)
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            NullValueHandling = NullValueHandling.Ignore,
-            DefaultValueHandling = DefaultValueHandling.Ignore
-        };
+            notificationOptions.ActionID = Guid.NewGuid().ToString();
+            isActionDefined = true;
+
+            BridgeConnector.Socket.Off("NotificationEventAction");
+            BridgeConnector.Socket.On("NotificationEventAction", args =>
+            {
+                var arguments = ((JArray)args).ToObject<string[]>();
+                _notificationOptions.Single(x => x.ReplyID == arguments[0]).OnAction(arguments[1]);
+            });
+        }
+
+        if (isActionDefined) _notificationOptions.Add(notificationOptions);
+    }
+
+    /// <summary>
+    ///     Whether or not desktop notifications are supported on the current system.
+    /// </summary>
+    /// <returns></returns>
+    public Task<bool> IsSupportedAsync()
+    {
+        var taskCompletionSource = new TaskCompletionSource<bool>();
+
+        BridgeConnector.Socket.On("notificationIsSupportedComplete", isSupported =>
+        {
+            BridgeConnector.Socket.Off("notificationIsSupportedComplete");
+            taskCompletionSource.SetResult((bool)isSupported);
+        });
+
+        BridgeConnector.Socket.Emit("notificationIsSupported");
+
+        return taskCompletionSource.Task;
     }
 }

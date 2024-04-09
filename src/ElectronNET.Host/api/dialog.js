@@ -8,8 +8,7 @@ module.exports = (socket) => {
             const window = electron_1.BrowserWindow.fromId(browserWindow.id);
             const messageBoxReturnValue = await electron_1.dialog.showMessageBox(window, options);
             electronSocket.emit('showMessageBoxComplete' + guid, [messageBoxReturnValue.response, messageBoxReturnValue.checkboxChecked]);
-        }
-        else {
+        } else {
             const id = guid || options;
             const messageBoxReturnValue = await electron_1.dialog.showMessageBox(browserWindow);
             electronSocket.emit('showMessageBoxComplete' + id, [messageBoxReturnValue.response, messageBoxReturnValue.checkboxChecked]);

@@ -30,7 +30,7 @@ module.exports = (socket) => {
         const browserWindow = getWindowById(id);
         browserWindow.webContents.removeAllListeners('did-navigate');
         browserWindow.webContents.on('did-navigate', (_, url, httpResponseCode) => {
-            electronSocket.emit('webContents-didNavigate' + id, { url, httpResponseCode });
+            electronSocket.emit('webContents-didNavigate' + id, {url, httpResponseCode});
         });
     });
     socket.on('register-webContents-willRedirect', (id) => {
@@ -44,7 +44,7 @@ module.exports = (socket) => {
         const browserWindow = getWindowById(id);
         browserWindow.webContents.removeAllListeners('did-fail-load');
         browserWindow.webContents.on('did-fail-load', (_, errorCode, validatedUrl) => {
-            electronSocket.emit('webContents-didFailLoad' + id, { errorCode, validatedUrl });
+            electronSocket.emit('webContents-didFailLoad' + id, {errorCode, validatedUrl});
         });
     });
     socket.on('register-webContents-didRedirectNavigation', (id) => {
@@ -72,12 +72,11 @@ module.exports = (socket) => {
             electronSocket.emit('webContents-domReady' + id);
         });
     });
-    
+
     socket.on('webContentsOpenDevTools', (id, options) => {
         if (options) {
             getWindowById(id).webContents.openDevTools(options);
-        }
-        else {
+        } else {
             getWindowById(id).webContents.openDevTools();
         }
     });
@@ -94,8 +93,7 @@ module.exports = (socket) => {
         fs.writeFile(path, buffer, (error) => {
             if (error) {
                 electronSocket.emit('webContents-printToPDF-completed', false);
-            }
-            else {
+            } else {
                 electronSocket.emit('webContents-printToPDF-completed', true);
             }
         });
@@ -105,7 +103,7 @@ module.exports = (socket) => {
         const result = await getWindowById(id).webContents.executeJavaScript(code, userGesture);
         electronSocket.emit('webContents-executeJavaScript-completed', result);
     });
-    
+
     socket.on('webContents-getUrl', function (id) {
         const browserWindow = getWindowById(id);
         electronSocket.emit('webContents-getUrl' + id, browserWindow.webContents.getURL());
@@ -229,12 +227,12 @@ module.exports = (socket) => {
         browserWindow.webContents
             .loadURL(url, options)
             .then(() => {
-            electronSocket.emit('webContents-loadURL-complete' + id);
-        })
+                electronSocket.emit('webContents-loadURL-complete' + id);
+            })
             .catch((error) => {
-            console.error(error);
-            electronSocket.emit('webContents-loadURL-error' + id, error);
-        });
+                console.error(error);
+                electronSocket.emit('webContents-loadURL-error' + id, error);
+            });
     });
     socket.on('webContents-insertCSS', (id, isBrowserWindow, path) => {
         if (isBrowserWindow) {
@@ -242,8 +240,7 @@ module.exports = (socket) => {
             if (browserWindow) {
                 browserWindow.webContents.insertCSS(fs.readFileSync(path, 'utf8'));
             }
-        }
-        else {
+        } else {
             const browserViews = (global['browserViews'] = global['browserViews'] || []);
             let view = null;
             for (let i = 0; i < browserViews.length; i++) {
@@ -272,9 +269,10 @@ module.exports = (socket) => {
     });
     socket.on('webContents-session-loadExtension', async (id, path, allowFileAccess = false) => {
         const browserWindow = getWindowById(id);
-        const extension = await browserWindow.webContents.session.loadExtension(path, { allowFileAccess: allowFileAccess });
+        const extension = await browserWindow.webContents.session.loadExtension(path, {allowFileAccess: allowFileAccess});
         electronSocket.emit('webContents-session-loadExtension-completed', extension);
     });
+
     function getWindowById(id) {
         if (id >= 1000) {
             return (0, browserView_1.browserViewMediateService)(id - 1000);

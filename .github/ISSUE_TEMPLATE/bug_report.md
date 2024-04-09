@@ -11,12 +11,14 @@ assignees: ''
 
 <!-- Which version of Electron.NET CLI and API are you using? -->
 <!-- Please always try to use latest version before report. -->
-* **Version**: 
+
+* **Version**:
 
 <!-- Which version of .NET Core and Node.js are you using (if applicable)? -->
 
 <!-- What target are you building for? -->
-* **Target**: 
+
+* **Target**:
 
 <!-- Enter your issue details below this comment. -->
 <!-- If you want, you can donate to increase issue priority (https://donorbox.org/electron-net) -->

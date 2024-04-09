@@ -2,28 +2,24 @@
 using ElectronNET.API.Entities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ElectronNET.WebApp.Controllers
+namespace ElectronNET.WebApp.Controllers;
+
+public class ShellController : Controller
 {
-    public class ShellController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
+        if (HybridSupport.IsElectronActive)
         {
-            if (HybridSupport.IsElectronActive)
+            Electron.IpcMain.On("open-file-manager", async args =>
             {
-                Electron.IpcMain.On("open-file-manager", async (args) =>
-                {
-                    string path = await Electron.App.GetPathAsync(PathName.Home);
-                    await Electron.Shell.ShowItemInFolderAsync(path);
+                var path = await Electron.App.GetPathAsync(PathName.Home);
+                await Electron.Shell.ShowItemInFolderAsync(path);
+            });
 
-                });
-
-                Electron.IpcMain.On("open-ex-links", async (args) =>
-                {
-                    await Electron.Shell.OpenExternalAsync("https://github.com/ElectronNET");
-                });
-            }
-
-            return View();
+            Electron.IpcMain.On("open-ex-links",
+                async args => { await Electron.Shell.OpenExternalAsync("https://github.com/ElectronNET"); });
         }
+
+        return View();
     }
 }

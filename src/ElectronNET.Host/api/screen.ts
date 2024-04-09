@@ -1,5 +1,6 @@
-import { Socket } from 'net';
-import { screen } from 'electron';
+import {Socket} from 'net';
+import {screen} from 'electron';
+
 let electronSocket;
 
 export = (socket: Socket) => {

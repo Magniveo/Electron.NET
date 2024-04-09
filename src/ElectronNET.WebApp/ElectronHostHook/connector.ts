@@ -1,7 +1,8 @@
 export class Connector {
     constructor(private socket: SocketIO.Socket,
-        // @ts-ignore
-        public app: Electron.App) { }
+                // @ts-ignore
+                public app: Electron.App) {
+    }
 
     on(key: string, javaScriptCode: Function): void {
         this.socket.on(key, (...args: any[]) => {

@@ -10,4 +10,5 @@ assignees: ''
 
 🚨 The issue tracker is not for questions 🚨
 
-The issue tracker is not for questions. Please ask questions on https://stackoverflow.com/questions/tagged/electron.net or via chat in https://gitter.im/ElectronNET/community.
+The issue tracker is not for questions. Please ask questions on https://stackoverflow.com/questions/tagged/electron.net
+or via chat in https://gitter.im/ElectronNET/community.

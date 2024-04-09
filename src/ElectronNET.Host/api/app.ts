@@ -1,4 +1,4 @@
-import { Socket } from "net";
+import {Socket} from 'net';
 
 let isQuitWindowAllClosed = true, electronSocket;
 let appWindowAllClosedEventId;
@@ -116,11 +116,11 @@ export = (socket: Socket, app: Electron.App) => {
         let error = {};
 
         if (options) {
-            const nativeImage = await app.getFileIcon(path, options).catch((errorFileIcon) =>  error = errorFileIcon);
+            const nativeImage = await app.getFileIcon(path, options).catch((errorFileIcon) => error = errorFileIcon);
 
             electronSocket.emit('appGetFileIconCompleted', [error, nativeImage]);
         } else {
-            const nativeImage = await app.getFileIcon(path).catch((errorFileIcon) =>  error = errorFileIcon);
+            const nativeImage = await app.getFileIcon(path).catch((errorFileIcon) => error = errorFileIcon);
 
             electronSocket.emit('appGetFileIconCompleted', [error, nativeImage]);
         }

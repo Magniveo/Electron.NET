@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ElectronNET.WebApp.Controllers
+namespace ElectronNET.WebApp.Controllers;
+
+public class DesktopCapturerController : Controller
 {
-    public class DesktopCapturerController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
     }
 }

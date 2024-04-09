@@ -162,10 +162,12 @@ module.exports = (socket, app) => {
     });
     socket.on('createBrowserWindow', (options, loadUrl) => {
         if (options.webPreferences && !('nodeIntegration' in options.webPreferences)) {
-            options = { ...options, webPreferences: { ...options.webPreferences, nodeIntegration: true, contextIsolation: false } };
-        }
-        else if (!options.webPreferences) {
-            options = { ...options, webPreferences: { nodeIntegration: true, contextIsolation: false } };
+            options = {
+                ...options,
+                webPreferences: {...options.webPreferences, nodeIntegration: true, contextIsolation: false}
+            };
+        } else if (!options.webPreferences) {
+            options = {...options, webPreferences: {nodeIntegration: true, contextIsolation: false}};
         }
         // we dont want to recreate the window when watch is ready.
         if (app.commandLine.hasSwitch('watch') && app['mainWindowURL'] === loadUrl) {
@@ -176,12 +178,11 @@ module.exports = (socket, app) => {
                 electronSocket.emit('BrowserWindowCreated', window.id);
                 return;
             }
-        }
-        else {
+        } else {
             window = new electron_1.BrowserWindow(options);
         }
         if (options.proxy) {
-            window.webContents.session.setProxy({ proxyRules: options.proxy });
+            window.webContents.session.setProxy({proxyRules: options.proxy});
         }
         if (options.proxy && options.proxyCredentials) {
             proxyToCredentialsMap[options.proxy] = options.proxyCredentials;
@@ -189,8 +190,7 @@ module.exports = (socket, app) => {
         window.on('ready-to-show', () => {
             if (readyToShowWindowsIds.includes(window.id)) {
                 readyToShowWindowsIds = readyToShowWindowsIds.filter(value => value !== window.id);
-            }
-            else {
+            } else {
                 readyToShowWindowsIds.push(window.id);
             }
         });
@@ -200,8 +200,7 @@ module.exports = (socket, app) => {
                 const windowItem = windows[index];
                 try {
                     windowItem.id;
-                }
-                catch (error) {
+                } catch (error) {
                     if (error.message === 'Object has been destroyed') {
                         windows.splice(index, 1);
                         const ids = [];
@@ -421,8 +420,7 @@ module.exports = (socket, app) => {
     socket.on('browserWindowSetSheetOffset', (id, offsetY, offsetX) => {
         if (offsetX) {
             getWindowById(id).setSheetOffset(offsetY, offsetX);
-        }
-        else {
+        } else {
             getWindowById(id).setSheetOffset(offsetY);
         }
     });
@@ -482,16 +480,20 @@ module.exports = (socket, app) => {
     socket.on('browserWindowRemoveMenu', (id) => {
         getWindowById(id).removeMenu();
     });
+
     function addMenuItemClickConnector(menuItems, callback) {
         menuItems.forEach((item) => {
             if (item.submenu && item.submenu.items.length > 0) {
                 addMenuItemClickConnector(item.submenu.items, callback);
             }
             if ('id' in item && item.id) {
-                item.click = () => { callback(item.id); };
+                item.click = () => {
+                    callback(item.id);
+                };
             }
         });
     }
+
     socket.on('browserWindowSetProgressBar', (id, progress) => {
         getWindowById(id).setProgressBar(progress);
     });
@@ -583,6 +585,7 @@ module.exports = (socket, app) => {
     socket.on('browserWindow-setBrowserView', (id, browserViewId) => {
         getWindowById(id).setBrowserView((0, browserView_1.browserViewMediateService)(browserViewId));
     });
+
     function getWindowById(id) {
         for (let index = 0; index < windows.length; index++) {
             const element = windows[index];

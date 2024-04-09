@@ -17,8 +17,7 @@ module.exports = (socket) => {
             await electron_1.shell.openExternal(url, options).catch(e => {
                 result = e.message;
             });
-        }
-        else {
+        } else {
             await electron_1.shell.openExternal(url).catch((e) => {
                 result = e.message;
             });
@@ -30,8 +29,7 @@ module.exports = (socket) => {
         try {
             await electron_1.shell.trashItem(fullPath);
             success = true;
-        }
-        catch (error) {
+        } catch (error) {
             success = false;
         }
         electronSocket.emit('shell-trashItem-completed', success);

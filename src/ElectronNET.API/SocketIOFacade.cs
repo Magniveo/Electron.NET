@@ -26,30 +26,18 @@ internal class SocketIoFacade
 
     public void Connect()
     {
-        _socket.OnError += (sender, e) =>
-        {
-            Console.WriteLine($"BridgeConnector Error: {sender} {e}");
-        };
+        _socket.OnError += (sender, e) => { Console.WriteLine($"BridgeConnector Error: {sender} {e}"); };
 
-        _socket.OnConnected += (_, _) =>
-        {
-            Console.WriteLine("BridgeConnector connected!");
-        };
+        _socket.OnConnected += (_, _) => { Console.WriteLine("BridgeConnector connected!"); };
 
-        _socket.OnDisconnected += (_, _) =>
-        {
-            Console.WriteLine("BridgeConnector disconnected!");
-        };
+        _socket.OnDisconnected += (_, _) => { Console.WriteLine("BridgeConnector disconnected!"); };
 
         _socket.ConnectAsync().GetAwaiter().GetResult();
     }
 
     public void On(string eventName, Action action)
     {
-        _socket.On(eventName, response =>
-        {
-            Task.Run(action);
-        });
+        _socket.On(eventName, response => { Task.Run(action); });
     }
 
     public void On<T>(string eventName, Action<T> action)
@@ -59,8 +47,8 @@ internal class SocketIoFacade
             var value = response.GetValue<T>();
             Task.Run(() => action(value));
         });
-    }        
-        
+    }
+
     // TODO: Remove this method when SocketIoClient supports object deserialization
     public void On(string eventName, Action<object> action)
     {
@@ -74,7 +62,7 @@ internal class SocketIoFacade
 
     public void Once<T>(string eventName, Action<T> action)
     {
-        _socket.On(eventName, (socketIoResponse) =>
+        _socket.On(eventName, socketIoResponse =>
         {
             _socket.Off(eventName);
             Task.Run(() => action(socketIoResponse.GetValue<T>()));

@@ -67,8 +67,8 @@ class Build : NukeBuild
             var api = SourceDirectory / ApiTargetLibName / $"{ApiTargetLibName}.csproj";
             var cli = SourceDirectory / CliTargetLibName / $"{CliTargetLibName}.csproj";
             var projects = new[] { api, cli };
-            return projects;    
-        }        
+            return projects;
+        }
     }
 
     protected override void OnBuildInitialized()
@@ -244,13 +244,13 @@ class Build : NukeBuild
                 throw new BuildAbortedException("Could not resolve the NuGet API key.");
             }
 
-            foreach (var nupkg in GlobFiles(ResultDirectory, "*.nupkg"))
+            /*foreach (var nupkg in GlobFiles(ResultDirectory, "*.nupkg"))
             {
                 DotNetNuGetPush(s => s
                     .SetTargetPath(nupkg)
                     .SetSource("https://api.nuget.org/v3/index.json")
                     .SetApiKey(apiKey));
-            }
+            }*/
         });
 
     Target PublishPreRelease => _ => _

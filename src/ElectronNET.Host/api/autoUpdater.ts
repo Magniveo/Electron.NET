@@ -1,5 +1,6 @@
-import { Socket } from 'net';
-import { autoUpdater } from 'electron-updater';
+import {Socket} from 'net';
+import {autoUpdater} from 'electron-updater';
+
 let electronSocket;
 
 export = (socket: Socket) => {

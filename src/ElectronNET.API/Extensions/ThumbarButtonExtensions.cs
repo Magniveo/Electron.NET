@@ -1,39 +1,31 @@
-﻿using ElectronNET.API.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using ElectronNET.API.Entities;
 
-namespace ElectronNET.API.Extensions
+namespace ElectronNET.API.Extensions;
+
+internal static class ThumbarButtonExtensions
 {
-    internal static class ThumbarButtonExtensions
+    public static ThumbarButton[] AddThumbarButtonsId(this ThumbarButton[] thumbarButtons)
     {
-        public static ThumbarButton[] AddThumbarButtonsId(this ThumbarButton[] thumbarButtons)
+        for (var index = 0; index < thumbarButtons.Length; index++)
         {
-            for (int index = 0; index < thumbarButtons.Length; index++)
-            {
-                var thumbarButton = thumbarButtons[index];
+            var thumbarButton = thumbarButtons[index];
 
-                if (string.IsNullOrEmpty(thumbarButton.Id))
-                {
-                    thumbarButton.Id = Guid.NewGuid().ToString();
-                }
-            }
-
-            return thumbarButtons;
+            if (string.IsNullOrEmpty(thumbarButton.Id)) thumbarButton.Id = Guid.NewGuid().ToString();
         }
 
-        public static ThumbarButton GetThumbarButton(this List<ThumbarButton> thumbarButtons, string id)
-        {
-            ThumbarButton result = new ThumbarButton("");
+        return thumbarButtons;
+    }
 
-            foreach (var item in thumbarButtons)
-            {
-                if (item.Id == id)
-                {
-                    result = item;
-                }
-            }
+    public static ThumbarButton GetThumbarButton(this List<ThumbarButton> thumbarButtons, string id)
+    {
+        var result = new ThumbarButton("");
 
-            return result;
-        }
+        foreach (var item in thumbarButtons)
+            if (item.Id == id)
+                result = item;
+
+        return result;
     }
 }

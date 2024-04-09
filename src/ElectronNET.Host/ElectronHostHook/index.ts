@@ -1,7 +1,7 @@
 // @ts-ignore
-import * as Electron from "electron";
-import { Socket } from "socket.io";
-import { Connector } from "./connector";
+import * as Electron from 'electron';
+import {Socket} from 'socket.io';
+import {Connector} from './connector';
 
 export class HookService extends Connector {
     constructor(socket: Socket, public app: Electron.App) {

@@ -1,27 +1,30 @@
-import { Socket } from 'net';
-import { BrowserWindow, Menu, nativeImage } from 'electron';
-import { browserViewMediateService } from './browserView';
+import {Socket} from 'net';
+import {BrowserWindow, Menu, nativeImage} from 'electron';
+import {browserViewMediateService} from './browserView';
+
 const path = require('path');
 const windows: Electron.BrowserWindow[] = (global['browserWindows'] = global['browserWindows'] || []) as Electron.BrowserWindow[];
 let readyToShowWindowsIds: number[] = [];
 let window, lastOptions, electronSocket;
 let mainWindowURL;
-const proxyToCredentialsMap: { [proxy: string]: string } = (global['proxyToCredentialsMap'] = global['proxyToCredentialsMap'] || []) as { [proxy: string]: string };
+const proxyToCredentialsMap: { [proxy: string]: string } = (global['proxyToCredentialsMap'] = global['proxyToCredentialsMap'] || []) as {
+    [proxy: string]: string
+};
 
 export = (socket: Socket, app: Electron.App) => {
     electronSocket = socket;
 
     app.on('login', (event, webContents, request, authInfo, callback) => {
         if (authInfo.isProxy) {
-            let proxy = `${authInfo.host}:${authInfo.port}`
+            let proxy = `${authInfo.host}:${authInfo.port}`;
             if (proxy in proxyToCredentialsMap && proxyToCredentialsMap[proxy].split(':').length === 2) {
-                event.preventDefault()
-                let user = proxyToCredentialsMap[proxy].split(':')[0]
-                let pass = proxyToCredentialsMap[proxy].split(':')[1]
-                callback(user, pass)
+                event.preventDefault();
+                let user = proxyToCredentialsMap[proxy].split(':')[0];
+                let pass = proxyToCredentialsMap[proxy].split(':')[1];
+                callback(user, pass);
             }
         }
-    })
+    });
 
     socket.on('register-browserWindow-ready-to-show', (id) => {
         if (readyToShowWindowsIds.includes(id)) {
@@ -193,9 +196,9 @@ export = (socket: Socket, app: Electron.App) => {
 
     socket.on('createBrowserWindow', (options, loadUrl) => {
         if (options.webPreferences && !('nodeIntegration' in options.webPreferences)) {
-            options = { ...options, webPreferences: { ...options.webPreferences, nodeIntegration: true, contextIsolation: false } };
+            options = {...options, webPreferences: {...options.webPreferences, nodeIntegration: true, contextIsolation: false}};
         } else if (!options.webPreferences) {
-            options = { ...options, webPreferences: { nodeIntegration: true, contextIsolation: false } };
+            options = {...options, webPreferences: {nodeIntegration: true, contextIsolation: false}};
         }
 
         // we dont want to recreate the window when watch is ready.
@@ -265,7 +268,7 @@ export = (socket: Socket, app: Electron.App) => {
         }
 
         // set main window url
-        if (app['mainWindowURL'] == undefined || app['mainWindowURL'] == "") {
+        if (app['mainWindowURL'] == undefined || app['mainWindowURL'] == '') {
             app['mainWindowURL'] = loadUrl;
             app['mainWindow'] = window;
         }
@@ -626,7 +629,9 @@ export = (socket: Socket, app: Electron.App) => {
             }
 
             if ('id' in item && item.id) {
-                item.click = () => { callback(item.id); };
+                item.click = () => {
+                    callback(item.id);
+                };
             }
         });
     }

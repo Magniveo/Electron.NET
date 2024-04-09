@@ -16,21 +16,24 @@ module.exports = (socket) => {
         };
         if (index === -1) {
             contextMenuItems.push(contextMenuItem);
-        }
-        else {
+        } else {
             contextMenuItems[index] = contextMenuItem;
         }
     });
+
     function addContextMenuItemClickConnector(menuItems, browserWindowId, callback) {
         menuItems.forEach((item) => {
             if (item.submenu && item.submenu.items.length > 0) {
                 addContextMenuItemClickConnector(item.submenu.items, browserWindowId, callback);
             }
             if ('id' in item && item.id) {
-                item.click = () => { callback(item.id, browserWindowId); };
+                item.click = () => {
+                    callback(item.id, browserWindowId);
+                };
             }
         });
     }
+
     socket.on('menu-contextMenuPopup', (browserWindowId) => {
         contextMenuItems.forEach(x => {
             if (x.browserWindowId === browserWindowId) {
@@ -46,13 +49,16 @@ module.exports = (socket) => {
         });
         electron_1.Menu.setApplicationMenu(menu);
     });
+
     function addMenuItemClickConnector(menuItems, callback) {
         menuItems.forEach((item) => {
             if (item.submenu && item.submenu.items.length > 0) {
                 addMenuItemClickConnector(item.submenu.items, callback);
             }
             if ('id' in item && item.id) {
-                item.click = () => { callback(item.id); };
+                item.click = () => {
+                    callback(item.id);
+                };
             }
         });
     }

@@ -1,39 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ElectronNET.API;
+﻿using ElectronNET.API;
 using ElectronNET.API.Entities;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ElectronNET.WebApp.Controllers
+namespace ElectronNET.WebApp.Controllers;
+
+public class NotificationsController : Controller
 {
-    public class NotificationsController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
+        if (HybridSupport.IsElectronActive)
         {
-            if(HybridSupport.IsElectronActive)
+            Electron.IpcMain.On("basic-noti", args =>
             {
-                Electron.IpcMain.On("basic-noti", (args) => {
+                var options = new NotificationOptions("Basic Notification", "Short message part")
+                {
+                    OnClick = async () => await Electron.Dialog.ShowMessageBoxAsync("Notification clicked")
+                };
 
-                    var options = new NotificationOptions("Basic Notification", "Short message part")
-                    {
-                        OnClick = async () => await Electron.Dialog.ShowMessageBoxAsync("Notification clicked")
-                    };
+                Electron.Notification.Show(options);
+            });
 
-                    Electron.Notification.Show(options);
+            Electron.IpcMain.On("advanced-noti", args =>
+            {
+                var options = new NotificationOptions("Notification with image", "Short message plus a custom image")
+                {
+                    OnClick = async () => await Electron.Dialog.ShowMessageBoxAsync("Notification clicked"),
+                    Icon = "/assets/img/programming.png"
+                };
 
-                });
-
-                Electron.IpcMain.On("advanced-noti", (args) => {
-
-                    var options = new NotificationOptions("Notification with image", "Short message plus a custom image")
-                    {
-                        OnClick = async () => await Electron.Dialog.ShowMessageBoxAsync("Notification clicked"),
-                        Icon = "/assets/img/programming.png"
-                    };
-
-                    Electron.Notification.Show(options);
-                });
-            }
-
-            return View();
+                Electron.Notification.Show(options);
+            });
         }
+
+        return View();
     }
 }
