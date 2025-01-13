@@ -2,7 +2,7 @@
 const {BrowserWindow} = require('electron');
 const {protocol} = require('electron');
 const path = require('path');
-const cProcess = require('child_process').spawn;
+const exec = require('child_process').exec;
 const portscanner = require('portscanner');
 const {imageSize} = require('image-size');
 let io, server, browserWindows, ipc, apiProcess, loadURL;
@@ -308,10 +308,15 @@ function startAspCoreBackend(electronPort) {
 
         let binFilePath = path.join(currentBinPath, binaryFile);
         var options = {cwd: currentBinPath};
-        apiProcess = cProcess(binFilePath, parameters, options);
-
-        apiProcess.stdout.on('data', (data) => {
-            console.log(`stdout: ${data.toString()}`);
+        exec(`${binFilePath} ${parameters.join(' ')}`, options, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+            }
+            console.log(`stdout: ${stdout}`);
+            if (stderr) {
+                console.error(`stderr: ${stderr}`);
+            }
         });
     }
 }
@@ -341,10 +346,15 @@ function startAspCoreBackendWithWatch(electronPort) {
             cwd: currentBinPath,
             env: process.env,
         };
-        apiProcess = cProcess('dotnet', parameters, options);
-
-        apiProcess.stdout.on('data', (data) => {
-            console.log(`stdout: ${data.toString()}`);
+        exec(`dotnet ${parameters.join(' ')}`, options, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+            }
+            console.log(`stdout: ${stdout}`);
+            if (stderr) {
+                console.error(`stderr: ${stderr}`);
+            }
         });
     }
 }
