@@ -98,10 +98,23 @@ app.on('ready', () => {
     });
 });
 
+const shutdownTimeout = 5000; // 5 sec
+
 app.on('quit', async (event, exitCode) => {
     await server.close();
-    apiProcess.kill();
+    apiProcess.kill('SIGTERM');
+
+    const timeout = setTimeout(() => {
+        console.log('API process not killed');
+        apiProcess.kill('SIGKILL');
+    }, shutdownTimeout);
+
+    apiProcess.on('exit', () => {
+        clearTimeout(timeout); 
+        console.log('API process killed.');
+    });
 });
+
 
 function isSplashScreenEnabled() {
     if (manifestJsonFile.hasOwnProperty('splashscreen')) {
@@ -308,7 +321,7 @@ function startAspCoreBackend(electronPort) {
 
         let binFilePath = path.join(currentBinPath, binaryFile);
         var options = {cwd: currentBinPath};
-        exec(`${binFilePath} ${parameters.join(' ')}`, options, (error, stdout, stderr) => {
+        apiProcess = exec(`${binFilePath} ${parameters.join(' ')}`, options, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
                 return;
@@ -346,7 +359,7 @@ function startAspCoreBackendWithWatch(electronPort) {
             cwd: currentBinPath,
             env: process.env,
         };
-        exec(`dotnet ${parameters.join(' ')}`, options, (error, stdout, stderr) => {
+        apiProcess = exec(`dotnet ${parameters.join(' ')}`, options, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
                 return;
