@@ -194,7 +194,7 @@ public class BuildCommand : ICommand
 
             Console.WriteLine($"Package Electron App for Platform {platformInfo.ElectronPackerPlatform}...");
             ProcessHelper.CmdExecute(
-                $"npx electron-builder --config=./bin/electron-builder.json --{platformInfo.ElectronPackerPlatform} --{electronArch} -c.electronVersion=23.2.0 {electronParams}",
+                $"npx electron-builder --config=./bin/electron-builder.json --{platformInfo.ElectronPackerPlatform} --{electronArch} -c.electronVersion=29.2.0 {electronParams}",
                 tempPath);
 
             Console.WriteLine("... done");
