@@ -7,6 +7,7 @@ export = (socket: Socket, app: Electron.App) => {
 
     // By default, quit when all windows are closed
     app.on('window-all-closed', () => {
+        console.log('app-window-all-closed TS');
         // On macOS it is common for applications and their menu bar
         // to stay active until the user quits explicitly with Cmd + Q
         if (process.platform !== 'darwin' && isQuitWindowAllClosed) {

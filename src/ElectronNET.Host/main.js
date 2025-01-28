@@ -99,7 +99,25 @@ app.on('ready', () => {
 });
 
 const shutdownTimeout = 5000; // 5 sec
+app.on('before-quit', async (event) => {
+    // Ожидаем завершения сервера
+    await server.close();
 
+    // Завершаем apiProcess
+    if (apiProcess) {
+        apiProcess.kill('SIGTERM');
+
+        const timeout = setTimeout(() => {
+            console.log('API process not killed, forcing kill.');
+            apiProcess.kill('SIGKILL');
+        }, shutdownTimeout);
+
+        apiProcess.on('exit', (code) => {
+            clearTimeout(timeout);
+            console.log(`API process killed with exit code: ${code}`);
+        });
+    }
+});
 app.on('quit', async (event, exitCode) => {
     await server.close();
     apiProcess.kill('SIGTERM');
@@ -110,11 +128,52 @@ app.on('quit', async (event, exitCode) => {
     }, shutdownTimeout);
 
     apiProcess.on('exit', () => {
-        clearTimeout(timeout); 
+        clearTimeout(timeout);
         console.log('API process killed.');
     });
 });
+function getAllPids(processName) {
+    return new Promise((resolve, reject) => {
+        // Determine the command based on the operating system
+        const command = process.platform === 'win32' ? 'tasklist' : 'ps -ef';
 
+        // Execute the command
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            // Parse the output to find the PIDs of the matching process
+            let pids = [];
+            if (process.platform === 'win32') {
+                // Windows: parse the tasklist output
+                const lines = stdout.trim().split('\n');
+                lines.forEach(line => {
+                    if (line.toLowerCase().includes(processName.toLowerCase())) {
+                        const pidMatch = line.match(/PID:\s*(\d+)/);
+                        if (pidMatch && pidMatch[1]) {
+                            pids.push(parseInt(pidMatch[1]));
+                        }
+                    }
+                });
+            } else {
+                // Unix-like systems: parse the ps output
+                const lines = stdout.trim().split('\n');
+                lines.forEach(line => {
+                    const parts = line.split(/\s+/);
+                    // The process name is usually the second to last element
+                    const processCmd = parts[parts.length - 2];
+                    if (processCmd.includes(processName)) {
+                        pids.push(parseInt(parts[1]));
+                    }
+                });
+            }
+
+            resolve(pids);
+        });
+    });
+}
 
 function isSplashScreenEnabled() {
     if (manifestJsonFile.hasOwnProperty('splashscreen')) {

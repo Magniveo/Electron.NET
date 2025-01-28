@@ -67,12 +67,18 @@ var app = builder.Build();
 
 ...
 
-await app.StartAsync();
-
+Electron.App.BeforeQuit += App_BeforeQuit;
 // Open the Electron-Window here
 await Electron.WindowManager.CreateWindowAsync();
 
-app.WaitForShutdown();
+await Task.Run(async () => app.Run());
+
+static async Task App_BeforeQuit(QuitEventArgs arg)
+{
+    Electron.App.Exit(0);
+
+    Environment.Exit(0);
+}
 ```
 
 ## Setup using Normal-API
