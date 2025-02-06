@@ -25,7 +25,7 @@ public class StartElectronCommand : ICommand
     private readonly string _manifest = "manifest";
     private readonly string _paramDotNetConfig = "dotnet-configuration";
     private readonly string _paramPublishReadyToRun = "PublishReadyToRun";
-    private readonly string _paramPublishSingleFile = "PublishSingleFile";
+    //private readonly string _paramPublishSingleFile = "PublishSingleFile";
     private readonly string _paramTarget = "target";
 
     public StartElectronCommand(string[] args)
@@ -68,12 +68,12 @@ public class StartElectronCommand : ICommand
             else
                 publishReadyToRun += "true";
 
-            var publishSingleFile = "/p:PublishSingleFile=";
+            /*var publishSingleFile = "/p:PublishSingleFile=";
             if (parser.Arguments.ContainsKey(_paramPublishSingleFile))
                 publishSingleFile += parser.Arguments[_paramPublishSingleFile][0];
             else
                 publishSingleFile += "true";
-
+*/
             // If target is specified as a command line argument, use it.
             // Format is the same as the build command.
             // If target is not specified, autodetect it.
@@ -93,7 +93,7 @@ public class StartElectronCommand : ICommand
 
             if (parser != null && !parser.Arguments.ContainsKey("watch"))
                 resultCode = ProcessHelper.CmdExecute(
-                    $"dotnet publish -r {platformInfo.NetCorePublishRid} -c \"{configuration}\" --output \"{tempBinPath}\" {publishReadyToRun} {publishSingleFile} --no-self-contained",
+                    $"dotnet publish -r {platformInfo.NetCorePublishRid} -c \"{configuration}\" --output \"{tempBinPath}\" {publishReadyToRun} --no-self-contained",
                     aspCoreProjectPath);
 
             if (resultCode != 0)
@@ -106,6 +106,7 @@ public class StartElectronCommand : ICommand
 
             var nodeModulesDirPath = Path.Combine(tempPath, "node_modules");
 
+            
             Console.WriteLine("node_modules missing in: " + nodeModulesDirPath);
 
             Console.WriteLine("Start npm install...");
@@ -138,13 +139,20 @@ public class StartElectronCommand : ICommand
 
             if (parser.Arguments.ContainsKey("watch")) arguments += " --watch=true";
 
+            
+            AddPackageJsonCommand.WritePackageJson(parser,_manifest, tempPath);
+           
+
+
             var path = Path.Combine(tempPath, "node_modules", ".bin");
             var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
             if (isWindows)
             {
                 Console.WriteLine("Invoke electron.cmd - in dir: " + path);
-                ProcessHelper.CmdExecute(@"electron.cmd ""..\..\main.js"" " + arguments, path);
+                //ProcessHelper.CmdExecute(@"electron.cmd ""..\..\main.js"" " + arguments, path);
+                ProcessHelper.CmdExecute(@"call .\electron.cmd ""..\.."" " + arguments, path);
+                
             }
             else
             {

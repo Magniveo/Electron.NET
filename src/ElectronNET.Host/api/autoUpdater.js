@@ -1,8 +1,18 @@
 "use strict";
 const electron_updater_1 = require("electron-updater");
 let electronSocket;
+electron_updater_1.autoUpdater.setFeedURL('http://localhost:5059/update?');
+electron_updater_1.autoUpdater.allowPrerelease = true; // Allow pre-release versions
+electron_updater_1.autoUpdater.forceDevUpdateConfig = true; // Force dev update config
 module.exports = (socket) => {
     electronSocket = socket;
+    
+    socket.on('autoUpdater-feedurl-set', (value) => {
+        electron_updater_1.autoUpdater.allowPrerelease = true; // Allow pre-release versions
+        electron_updater_1.autoUpdater.forceDevUpdateConfig = true; // Force dev update config
+        electron_updater_1.autoUpdater.setFeedURL(value);
+    });
+    
     socket.on('register-autoUpdater-error-event', (id) => {
         electron_updater_1.autoUpdater.on('error', (error) => {
             electronSocket.emit('autoUpdater-error' + id, error.message);

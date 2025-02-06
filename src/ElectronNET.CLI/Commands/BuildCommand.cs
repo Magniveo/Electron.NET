@@ -43,7 +43,7 @@ public class BuildCommand : ICommand
     private readonly string _paramOutputDirectory = "relative-path";
     private readonly string _paramPackageJson = "package-json";
     private readonly string _paramPublishReadyToRun = "PublishReadyToRun";
-    private readonly string _paramPublishSingleFile = "PublishSingleFile";
+    //private readonly string _paramPublishSingleFile = "PublishSingleFile";
 
     private readonly string _paramTarget = "target";
     private readonly string _paramVersion = "Version";
@@ -180,21 +180,11 @@ public class BuildCommand : ICommand
             if (parser.Arguments.ContainsKey(_paramElectronParams))
                 electronParams = parser.Arguments[_paramElectronParams][0];
 
-            // ToDo: Make the same thing easer with native c# - we can save a tmp file in production code :)
-            Console.WriteLine("Create electron-builder configuration file...");
-
-            var manifestFileName = "electron.manifest.json";
-
-            if (parser.Arguments.ContainsKey(_manifest)) manifestFileName = parser.Arguments[_manifest].First();
-
-            ProcessHelper.CmdExecute(
-                string.IsNullOrWhiteSpace(version)
-                    ? $"node build-helper.js {manifestFileName}"
-                    : $"node build-helper.js {manifestFileName} {version}", tempPath);
+            AddPackageJsonCommand.WritePackageJson(parser, _manifest, tempPath);
 
             Console.WriteLine($"Package Electron App for Platform {platformInfo.ElectronPackerPlatform}...");
             ProcessHelper.CmdExecute(
-                $"npx electron-builder --config=./bin/electron-builder.json --{platformInfo.ElectronPackerPlatform} --{electronArch} -c.electronVersion=29.2.0 {electronParams}",
+                $"npx electron-builder --config=./bin/electron-builder.json --{platformInfo.ElectronPackerPlatform} --{electronArch} -c.electronVersion=34.0.2 {electronParams}",
                 tempPath);
 
             Console.WriteLine("... done");
@@ -208,7 +198,7 @@ public class BuildCommand : ICommand
         var dotNetPublishFlags = new Dictionary<string, string>
         {
             { "/p:PublishReadyToRun", parser.TryGet(_paramPublishReadyToRun, out var rtr) ? rtr[0] : "true" },
-            { "/p:PublishSingleFile", parser.TryGet(_paramPublishSingleFile, out var psf) ? psf[0] : "true" }
+            //{ "/p:PublishSingleFile", parser.TryGet(_paramPublishSingleFile, out var psf) ? psf[0] : "true" }
         };
 
         if (parser.Arguments.ContainsKey(_paramVersion))

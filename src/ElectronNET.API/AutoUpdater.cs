@@ -593,4 +593,12 @@ public sealed class AutoUpdater
 
         return taskCompletionSource.Task;
     }
+    /// <summary>
+    ///     Set Feed URL.
+    /// </summary>
+    /// <returns>Feed URL.</returns>
+    public async Task SetFeedURLAsync(string value)
+    {
+        await BridgeConnector.Socket.Emit("autoUpdater-feedurl-set", value);
+    }
 }

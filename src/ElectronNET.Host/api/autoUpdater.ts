@@ -2,10 +2,19 @@ import {Socket} from 'net';
 import {autoUpdater} from 'electron-updater';
 
 let electronSocket;
-
+autoUpdater.setFeedURL('http://localhost:5059/update?');
+// Force auto-update in development mode
+autoUpdater.allowPrerelease = true; // Allow pre-release versions
+autoUpdater.forceDevUpdateConfig = true; // Force dev update config
 export = (socket: Socket) => {
     electronSocket = socket;
 
+    socket.on('autoUpdater-feedurl-set', (value) => {
+        autoUpdater.autoUpdater.allowPrerelease = true; // Allow pre-release versions
+        autoUpdater.autoUpdater.forceDevUpdateConfig = true; // Force dev update config
+        autoUpdater.autoUpdater.setFeedURL(value);
+    });
+    
     socket.on('register-autoUpdater-error-event', (id) => {
         autoUpdater.on('error', (error) => {
             electronSocket.emit('autoUpdater-error' + id, error.message);

@@ -1,5 +1,8 @@
+# 34.0.2
 # 29.2.0
+* Problem with build params PublishSingleFile
 * Updated electron packages 
+* Spawn to exec
 # 23.6.2
 
 ## ElectronNET.API

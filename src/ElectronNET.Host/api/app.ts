@@ -132,7 +132,7 @@ export = (socket: Socket, app: Electron.App) => {
     });
 
     socket.on('appGetVersion', () => {
-        const version = app.getVersion();
+        const version = app.getVersion(); 
         electronSocket.emit('appGetVersionCompleted', version);
     });
 

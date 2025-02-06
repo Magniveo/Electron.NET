@@ -104,6 +104,7 @@ module.exports = (socket, app) => {
     });
     socket.on('appGetVersion', () => {
         const version = app.getVersion();
+        console.log(version);
         electronSocket.emit('appGetVersionCompleted', version);
     });
     socket.on('appGetName', () => {
